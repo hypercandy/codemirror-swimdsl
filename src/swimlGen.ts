@@ -44,16 +44,14 @@ function xmlDuration(minutes: string, seconds: string): string {
  *
  * @param xmlParent - The parent XML node to write the instruction inside of.
  * @param instruction - The AST instruction node to write as XML.
- * @param poolLength - The length of the pool in meters.
  */
 function writeInstruction(
   xmlParent: XMLBuilder,
   instruction: Instruction,
-  poolLength: number,
 ): void {
   switch (instruction.statement) {
     case Statements.SWIM_INSTRUCTION:
-      writeSwimInstruction(xmlParent, instruction, poolLength);
+      writeSwimInstruction(xmlParent, instruction);
       break;
 
     case Statements.MESSAGE:
@@ -147,12 +145,10 @@ function writeInstructionModifier(
  *
  * @param xmlParent - The parent XML node to write the instruction inside of.
  * @param instruction - The AST swim instruction node to write as XML.
- * @param poolLength - The length of the pool in meters.
  */
 function writeSwimInstruction(
   xmlParent: XMLBuilder,
   instruction: SwimInstruction,
-  poolLength: number,
 ): void {
   let parent = xmlParent.ele("instruction");
 
@@ -163,7 +159,7 @@ function writeSwimInstruction(
 
   if (instruction.instruction.isBlock) {
     for (const subInstruction of instruction.instruction.instructions) {
-      writeInstruction(parent, subInstruction, poolLength);
+      writeInstruction(parent, subInstruction);
     }
   } else {
     const len = instruction.instruction.length;
@@ -285,20 +281,10 @@ export default function emitXml(programme: Programme): string {
     "xsi:schemaLocation": SCHEMA_LOCATION,
   });
 
-  let poolLength = 25; // default
-  for (const statement of programme.statements) {
-    if (
-      statement.statement === Statements.CONSTANT_DEFINITION &&
-      statement.constantName === "PoolLength"
-    ) {
-      poolLength = Number(statement.value);
-    }
-  }
-
   for (const statement of programme.statements) {
     switch (statement.statement) {
       case Statements.SWIM_INSTRUCTION:
-        writeSwimInstruction(doc, statement, poolLength);
+        writeSwimInstruction(doc, statement);
         break;
 
       case Statements.MESSAGE:
