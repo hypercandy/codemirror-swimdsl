@@ -51,7 +51,6 @@ statement {
 
 instruction {
     SwimInstruction
-    | RestInstruction
     | messageSpecification
 }
 
@@ -65,12 +64,16 @@ SingleInstruction {
 }
 
 Length {
-    LengthAsDistance
-  | LengthAsTime
+    LengthAsDistance | LengthAsLaps | LengthAsTime
 }
 
 LengthAsDistance { Number }
-LengthAsTime     { Duration }
+
+LengthAsLaps {
+    Number lapsKeyword
+}
+
+LengthAsTime { Duration }
 
 Stroke { identifier }
 
@@ -87,10 +90,31 @@ Underwater {
 instructionModifier {
     EquipmentSpecification
     | paceSpecification
-    | timeSpecification
+    | Rest
     | Underwater
     | Breathe
     | InstructionDescription
+    | ExcludeAlignSpecification
+}
+
+ExcludeAlignSpecification {
+    excludeAlignKeyword
+}
+
+Rest {
+    RestSinceStart | RestAfterStop | RestInOut
+}
+
+RestSinceStart {
+    onKeyword Duration
+}
+
+RestAfterStop {
+    withKeyword Duration
+}
+
+RestInOut {
+    inOutKeyword Number
 }
 
 InstructionDescription {
@@ -111,16 +135,8 @@ paceSpecification {
     "@" Pace
 }
 
-timeSpecification {
-    onKeyword Duration
-}
-
 Duration {
     Number ":" Number    // minutes:seconds
-}
-
-RestInstruction {
-    Duration restKeyword
 }
 
 messageSpecification {
@@ -131,10 +147,11 @@ messageSpecification {
     setKeyword            { "set" }
     authorKeyword         { "author" }
     paceKeyword           { "pace" }
-    restKeyword           { "rest" }
+    withKeyword           { "with" }
     onKeyword             { "on" }
-    underwaterKeyword     { "Underwater" }
+    underwaterKeyword     { "underwater" }
     breatheKeyword        { "breathe" }
+    inOutKeyword          { "in-out" }
     space       { @whitespace+ }
     Comment     { "#" ![\n]* }
     Number      { @digit+ }
@@ -142,6 +159,8 @@ messageSpecification {
     StringContent { (!["\\] | "\\" _)+ }
     identifier  { @asciiLetter+ }
     repititionOperator { "x" }
+    lapsKeyword { "laps" | "lap" }
+    excludeAlignKeyword { "noalign" }
     @precedence { StringContent, space }
     @precedence { StringContent, Comment }
     @precedence { repititionOperator, identifier }
@@ -151,9 +170,15 @@ messageSpecification {
     @precedence { onKeyword, identifier }
     @precedence { space, Message }
     @precedence { Comment, Message }
+    @precedence { lapsKeyword, identifier }
+    @precedence { lapsKeyword, Message }
     @precedence { restKeyword, identifier }
+    @precedence { excludeAlignKeyword, identifier }
+    @precedence { excludeAlignKeyword, Message }
     @precedence { underwaterKeyword, identifier }
     @precedence { breatheKeyword, identifier }
+    @precedence { withKeyword, identifier }
+    @precedence { inOutKeyword, identifier }
 }
 
 @skip { space | Comment }

@@ -13,12 +13,12 @@ import {
   Pace,
   PaceDefinition,
   Programme,
-  RestInstruction,
+  Rest,
   SingleInstruction,
   Statement,
   Statements,
   SwimInstruction,
-  LengthNode,
+  Length,
 } from "./astTypes";
 import { EditorState } from "@codemirror/state";
 
@@ -140,10 +140,6 @@ function visitInstruction(cursor: TreeCursor, state: EditorState): Instruction {
     return visitSwimInstruction(cursor, state);
   }
 
-  if (cursor.name === "RestInstruction") {
-    return visitRestInstruction(cursor, state);
-  }
-
   return visitMessage(cursor, state);
 }
 
@@ -255,6 +251,10 @@ function visitInstructionModifier(
     return visitPace(cursor, state);
   }
 
+  if (cursor.name === "ExcludeAlignSpecification") {
+    return { modifier: InstructionModifiers.EXCLUDE_ALIGN };
+  }
+
   if (cursor.name === "Breathe") {
     return visitBreathe(cursor, state);
   }
@@ -270,11 +270,53 @@ function visitInstructionModifier(
     };
   }
 
-  // We are in Duration
-  return {
-    modifier: InstructionModifiers.TIME,
-    ...visitDuration(cursor, state),
-  };
+  // We are in Rest
+  return visitRest(cursor, state);
+}
+
+/**
+ * Create an AST node for a `Rest` CST node.
+ *
+ * Precondition: `cursor` points to a `Rest` node.
+ *
+ * Postcondition: `cursor` will point to the same node it pointed to when
+ * passed to this function.
+ *
+ * @param cursor - A reference to a Lezer syntax tree node.
+ * @param state - The state of the CodeMirror editor.
+ *
+ * @returns A `Rest` AST node.
+ */
+function visitRest(cursor: TreeCursor, state: EditorState): Rest {
+  cursor.firstChild(); // Step into the RestType
+  let rest: Rest;
+
+  if (cursor.name === "RestInOut") {
+    cursor.firstChild(); // Step into Number
+    const swimmersIn = state.sliceDoc(cursor.from, cursor.to);
+    cursor.parent(); // Back to RestInOut
+
+    rest = {
+      modifier: InstructionModifiers.REST,
+      type: "InOut",
+      swimmersIn: swimmersIn,
+    };
+  } else {
+    const type = cursor.name === "RestAfterStop" ? "AfterStop" : "SinceStart";
+
+    cursor.firstChild();
+    const duration = visitDuration(cursor, state);
+    cursor.parent();
+
+    rest = {
+      modifier: InstructionModifiers.REST,
+      type,
+      ...duration,
+    };
+  }
+  cursor.parent(); // Back to Rest
+
+  return rest;
 }
 
 /**
@@ -412,30 +454,45 @@ function visitSwimInstruction(
     } while (cursor.nextSibling());
 
     instruction = { isBlock: true, instructions };
+    // cursor is still on the last instruction of the block
   } else {
     // cursor is on SingleInstruction
     cursor.firstChild();
     cursor.firstChild();
 
-    let length: LengthNode;
-    if (cursor.name === "LengthAsDistance") {
-      cursor.firstChild();
-      length = { kind: "distance", value: state.sliceDoc(cursor.from, cursor.to) };
-      cursor.parent();
-    } else if (cursor.name === "LengthAsTime") {
-      cursor.firstChild();
-      length = { kind: "time", ...visitDuration(cursor, state) };
-      cursor.parent();
-    } else {
-      throw new Error(`Unexpected length node: ${cursor.name}`);
+    let kind: Length["kind"];
+
+    switch (cursor.name) {
+      case "LengthAsDistance":
+        kind = "distance";
+        break;
+
+      case "LengthAsLaps":
+        kind = "laps";
+        break;
+        
+      case "LengthAsTime":
+        kind = "time";
+        break;
+
+      default:
+        kind = "distance";
     }
 
-    cursor.parent();
+    cursor.firstChild();
+
+    const length: Length = {
+      kind,
+      value: state.sliceDoc(cursor.from, cursor.to),
+    };
+    cursor.parent(); // exits LengthAsDistance or LengthAsLaps or LengthAsTime
+
+    cursor.parent(); // exits length
     cursor.nextSibling();
     const stroke = (cursor.name as string) !== "Stroke" ? "any" : getStroke(state.sliceDoc(cursor.from, cursor.to));
 
     instruction = { isBlock: false, length, stroke };
-    cursor.parent();
+    // cursor is still on the Stroke
   }
   // Move back up to SwimInstruction
   cursor.parent();
@@ -465,37 +522,6 @@ function visitSwimInstruction(
     instruction,
     strokeModifier,
     instructionModifiers,
-  };
-}
-
-/**
- * Create an AST node for a `RestInstruction` CST node.
- *
- * Precondition: `cursor` points to a `RestInstruction` node.
- *
- * Postcondition: `cursor` will point to the same node it pointed to when
- * passed to this function.
- *
- * @param cursor - A reference to a Lezer syntax tree node.
- * @param state - The state of the CodeMirror editor.
- *
- * @returns A `RestInstruction` AST node.
- */
-function visitRestInstruction(
-  cursor: TreeCursor,
-  state: EditorState,
-): RestInstruction {
-  // Move down to Duration
-  cursor.firstChild();
-
-  const duration = visitDuration(cursor, state);
-
-  // Move back up to RestInstruction
-  cursor.parent();
-
-  return {
-    statement: Statements.REST_INSTRUCTION,
-    ...duration,
   };
 }
 
@@ -647,9 +673,6 @@ export default function buildAst(
       switch (cursor.type.name) {
         case "SwimInstruction":
           node = visitSwimInstruction(cursor, state);
-          break;
-        case "RestInstruction":
-          node = visitRestInstruction(cursor, state);
           break;
         case "Message":
           node = visitMessage(cursor, state);
