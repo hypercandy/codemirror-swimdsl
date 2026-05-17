@@ -470,7 +470,7 @@ function visitSwimInstruction(
       case "LengthAsLaps":
         kind = "laps";
         break;
-        
+
       case "LengthAsTime":
         kind = "time";
         break;
@@ -480,16 +480,17 @@ function visitSwimInstruction(
     }
 
     cursor.firstChild();
-
-    const length: Length = {
-      kind,
-      value: state.sliceDoc(cursor.from, cursor.to),
-    };
+    let length: Length;
+    if (kind === "time") {
+      length = { kind, ...visitDuration(cursor, state) };
+    } else {
+      length = { kind, value: state.sliceDoc(cursor.from, cursor.to) };
+    }
     cursor.parent(); // exits LengthAsDistance or LengthAsLaps or LengthAsTime
 
     cursor.parent(); // exits length
     cursor.nextSibling();
-    const stroke = (cursor.name as string) !== "Stroke" ? "any" : getStroke(state.sliceDoc(cursor.from, cursor.to));
+    const stroke = getStroke(state.sliceDoc(cursor.from, cursor.to));
 
     instruction = { isBlock: false, length, stroke };
     // cursor is still on the Stroke
@@ -499,7 +500,7 @@ function visitSwimInstruction(
 
   if (cursor.nextSibling()) {
     let hasModifiers = true;
-    if ((cursor.name as string) === "StrokeModifier") {
+    if (cursor.name === "StrokeModifier") {
       strokeModifier = state.sliceDoc(cursor.from, cursor.to);
 
       // Move away from the StrokeModifier to a potential instruction modifier.

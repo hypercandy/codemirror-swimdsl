@@ -172,7 +172,6 @@ messageSpecification {
     @precedence { Comment, Message }
     @precedence { lapsKeyword, identifier }
     @precedence { lapsKeyword, Message }
-    @precedence { restKeyword, identifier }
     @precedence { excludeAlignKeyword, identifier }
     @precedence { excludeAlignKeyword, Message }
     @precedence { underwaterKeyword, identifier }

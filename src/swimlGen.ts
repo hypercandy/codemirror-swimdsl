@@ -173,7 +173,7 @@ function writeSwimInstruction(
     } else if (len.kind == "laps") {
       length.ele("lengthAsLaps").txt(len.value);
     } else {
-      lengthNode.ele("lengthAsTime").txt(xmlDuration(len.minutes, len.seconds));
+      length.ele("lengthAsTime").txt(xmlDuration(len.minutes, len.seconds));
     }
     parent
       .ele("stroke")

@@ -38,6 +38,13 @@ SwimProgramme(
   SwimInstruction(SingleInstruction(Length(LengthAsLaps(Number)), Stroke)),
   SwimInstruction(SingleInstruction(Length(LengthAsLaps(Number)), Stroke)))
 
+## Time-based single instruction
+
+1:30 Freestyle
+
+==>
+
+SwimProgramme(SwimInstruction(SingleInstruction(Length(LengthAsTime(Duration(Number, Number))), Stroke)))
 
 ## Single instruction with a stroke modifier
 
