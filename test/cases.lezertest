@@ -32,7 +32,7 @@ SwimProgramme(ContinueInstruction(
 
 ==>
 
-SwimProgramme(SwimInstruction(SingleInstruction(Number, Stroke)))
+SwimProgramme(SwimInstruction(SingleInstruction(Length(LengthAsDistance(Number)), Stroke)))
 
 
 ## Multiple single instructions
@@ -43,9 +43,36 @@ SwimProgramme(SwimInstruction(SingleInstruction(Number, Stroke)))
 ==>
 
 SwimProgramme(
-  SwimInstruction(SingleInstruction(Number, Stroke)),
-  SwimInstruction(SingleInstruction(Number, Stroke)))
+  SwimInstruction(SingleInstruction(Length(LengthAsDistance(Number)), Stroke)),
+  SwimInstruction(SingleInstruction(Length(LengthAsDistance(Number)), Stroke)))
 
+## Laps-based single instruction
+
+1 lap Back
+
+==>
+
+SwimProgramme(SwimInstruction(SingleInstruction(Length(LengthAsLaps(Number)), Stroke)))
+
+
+## Multiple laps-based instructions
+
+1 lap Back
+1 lap Free
+
+==>
+
+SwimProgramme(
+  SwimInstruction(SingleInstruction(Length(LengthAsLaps(Number)), Stroke)),
+  SwimInstruction(SingleInstruction(Length(LengthAsLaps(Number)), Stroke)))
+
+## Time-based single instruction
+
+1:30 Freestyle
+
+==>
+
+SwimProgramme(SwimInstruction(SingleInstruction(Length(LengthAsTime(Duration(Number, Number))), Stroke)))
 
 ## Single instruction with a stroke modifier
 
@@ -53,7 +80,7 @@ SwimProgramme(
 
 ==>
 
-SwimProgramme(SwimInstruction(SingleInstruction(Number, Stroke), StrokeModifier))
+SwimProgramme(SwimInstruction(SingleInstruction(Length(LengthAsDistance(Number)), Stroke), StrokeModifier))
 
 
 ## Single instruction with a single equipment item
@@ -63,7 +90,7 @@ SwimProgramme(SwimInstruction(SingleInstruction(Number, Stroke), StrokeModifier)
 ==>
 
 SwimProgramme(SwimInstruction(
-  SingleInstruction(Number, Stroke),
+  SingleInstruction(Length(LengthAsDistance(Number)), Stroke),
   EquipmentSpecification(EquipmentName)))
 
 
@@ -74,7 +101,7 @@ SwimProgramme(SwimInstruction(
 ==>
 
 SwimProgramme(SwimInstruction(
-  SingleInstruction(Number, Stroke),
+  SingleInstruction(Length(LengthAsDistance(Number)), Stroke),
   StrokeModifier,
   EquipmentSpecification(EquipmentName, EquipmentName)))
 
@@ -86,7 +113,7 @@ SwimProgramme(SwimInstruction(
 ==>
 
 SwimProgramme(SwimInstruction(
-  SingleInstruction(Number, Stroke),
+  SingleInstruction(Length(LengthAsDistance(Number)), Stroke),
   StrokeModifier,
   EquipmentSpecification(EquipmentName, EquipmentName, EquipmentName)))
 
@@ -98,7 +125,7 @@ SwimProgramme(SwimInstruction(
 ==>
 
 SwimProgramme(SwimInstruction(
-  SingleInstruction(Number, Stroke),
+  SingleInstruction(Length(LengthAsDistance(Number)), Stroke),
   Pace(Number)))
 
 
@@ -109,7 +136,7 @@ SwimProgramme(SwimInstruction(
 ==>
 
 SwimProgramme(SwimInstruction(
-  SingleInstruction(Number, Stroke),
+  SingleInstruction(Length(LengthAsDistance(Number)), Stroke),
   Pace(Number, Number)))
 
 
@@ -120,7 +147,7 @@ SwimProgramme(SwimInstruction(
 ==>
 
 SwimProgramme(SwimInstruction(
-  SingleInstruction(Number, Stroke),
+  SingleInstruction(Length(LengthAsDistance(Number)), Stroke),
   Pace(PaceAlias)))
 
 
@@ -131,7 +158,7 @@ SwimProgramme(SwimInstruction(
 ==>
 
 SwimProgramme(SwimInstruction(
-  SingleInstruction(Number, Stroke),
+  SingleInstruction(Length(LengthAsDistance(Number)), Stroke),
   Pace(PaceAlias, PaceAlias)))
 
 
@@ -142,7 +169,7 @@ SwimProgramme(SwimInstruction(
 ==>
 
 SwimProgramme(SwimInstruction(
-  SingleInstruction(Number, Stroke),
+  SingleInstruction(Length(LengthAsDistance(Number)), Stroke),
   Pace(Number, PaceAlias)))
 
 
@@ -153,7 +180,7 @@ SwimProgramme(SwimInstruction(
 ==>
 
 SwimProgramme(SwimInstruction(
-  SingleInstruction(Number, Stroke),
+  SingleInstruction(Length(LengthAsDistance(Number)), Stroke),
   Pace(PaceAlias, Number)))
 
 
@@ -196,31 +223,19 @@ SwimProgramme(PaceDefinition(PaceDefinitionName, Pace(Number, Number)))
 ==>
 
 SwimProgramme(SwimInstruction(
-  SingleInstruction(Number, Stroke),
-  Duration(Number, Number)))
+  SingleInstruction(Length(LengthAsDistance(Number)), Stroke),
+  Rest(RestSinceStart(Duration(Number, Number)))))
 
 
 ## Rest instruction
 
-1:00 rest
+100 Freestyle with 1:00
 
 ==>
 
-SwimProgramme(RestInstruction(Duration(Number, Number)))
-
-
-## Multiple rest instructions
-
-1:00 rest
-0:30 rest
-0:15 rest
-
-==>
-
-SwimProgramme(
-  RestInstruction(Duration(Number, Number)),
-  RestInstruction(Duration(Number, Number)),
-  RestInstruction(Duration(Number, Number)))
+SwimProgramme(SwimInstruction(
+  SingleInstruction(Length(LengthAsDistance(Number)), Stroke),
+  Rest(RestAfterStop(Duration(Number, Number)))))
 
 
 ## Repeated single instruction
@@ -231,7 +246,7 @@ SwimProgramme(
 
 SwimProgramme(SwimInstruction(
   Number,
-  SingleInstruction(Number, Stroke)))
+  SingleInstruction(Length(LengthAsDistance(Number)), Stroke)))
 
 
 ## Repeated single instruction with rest from start
@@ -242,8 +257,8 @@ SwimProgramme(SwimInstruction(
 
 SwimProgramme(SwimInstruction(
   Number,
-  SingleInstruction(Number, Stroke),
-  Duration(Number, Number)))
+  SingleInstruction(Length(LengthAsDistance(Number)), Stroke),
+  Rest(RestSinceStart(Duration(Number, Number)))))
 
 
 ## Repeated single instruction with intensity
@@ -254,7 +269,7 @@ SwimProgramme(SwimInstruction(
 
 SwimProgramme(SwimInstruction(
   Number,
-  SingleInstruction(Number, Stroke),
+  SingleInstruction(Length(LengthAsDistance(Number)), Stroke),
   Pace(Number, Number)))
 
 
@@ -265,7 +280,7 @@ SwimProgramme(SwimInstruction(
 ==>
 
 SwimProgramme(SwimInstruction(BlockInstruction(
-  SwimInstruction(SingleInstruction(Number, Stroke)))))
+  SwimInstruction(SingleInstruction(Length(LengthAsDistance(Number)), Stroke)))))
 
 
 ## Block instruction with multiple single instructions
@@ -278,8 +293,8 @@ SwimProgramme(SwimInstruction(BlockInstruction(
 ==>
 
 SwimProgramme(SwimInstruction(BlockInstruction(
-  SwimInstruction(SingleInstruction(Number, Stroke)),
-  SwimInstruction(SingleInstruction(Number, Stroke)))))
+  SwimInstruction(SingleInstruction(Length(LengthAsDistance(Number)), Stroke)),
+  SwimInstruction(SingleInstruction(Length(LengthAsDistance(Number)), Stroke)))))
 
 
 ## Block instruction with intensity
@@ -293,8 +308,8 @@ SwimProgramme(SwimInstruction(BlockInstruction(
 
 SwimProgramme(SwimInstruction(
   BlockInstruction(
-    SwimInstruction(SingleInstruction(Number, Stroke)),
-    SwimInstruction(SingleInstruction(Number, Stroke))),
+    SwimInstruction(SingleInstruction(Length(LengthAsDistance(Number)), Stroke)),
+    SwimInstruction(SingleInstruction(Length(LengthAsDistance(Number)), Stroke))),
   Pace(Number)))
 
 
@@ -311,11 +326,11 @@ SwimProgramme(SwimInstruction(
 
 SwimProgramme(SwimInstruction(
   BlockInstruction(
-    SwimInstruction(SingleInstruction(Number, Stroke)),
-    SwimInstruction(SingleInstruction(Number, Stroke)),
-    SwimInstruction(SingleInstruction(Number, Stroke)),
-    SwimInstruction(SingleInstruction(Number, Stroke))),
-  Duration(Number, Number)))
+    SwimInstruction(SingleInstruction(Length(LengthAsDistance(Number)), Stroke)),
+    SwimInstruction(SingleInstruction(Length(LengthAsDistance(Number)), Stroke)),
+    SwimInstruction(SingleInstruction(Length(LengthAsDistance(Number)), Stroke)),
+    SwimInstruction(SingleInstruction(Length(LengthAsDistance(Number)), Stroke))),
+  Rest(RestSinceStart(Duration(Number, Number)))))
 
 
 ## Repeated block instruction
@@ -330,16 +345,15 @@ SwimProgramme(SwimInstruction(
 SwimProgramme(SwimInstruction(
   Number,
   BlockInstruction(
-    SwimInstruction(SingleInstruction(Number, Stroke)),
-    SwimInstruction(SingleInstruction(Number, Stroke)))))
+    SwimInstruction(SingleInstruction(Length(LengthAsDistance(Number)), Stroke)),
+    SwimInstruction(SingleInstruction(Length(LengthAsDistance(Number)), Stroke)))))
 
 
 ## Block instruction with multiple instruction modifiers
 
 2 x {
   50 Backstroke
-  100 Freestyle
-  0:30 rest
+  100 Freestyle with 0:30
 } Pull + PullBuoy @ 70%
 
 ==>
@@ -347,9 +361,8 @@ SwimProgramme(SwimInstruction(
 SwimProgramme(SwimInstruction(
   Number,
   BlockInstruction(
-    SwimInstruction(SingleInstruction(Number, Stroke)),
-    SwimInstruction(SingleInstruction(Number, Stroke)),
-    RestInstruction(Duration(Number, Number))),
+    SwimInstruction(SingleInstruction(Length(LengthAsDistance(Number)), Stroke)),
+    SwimInstruction(SingleInstruction(Length(LengthAsDistance(Number)), Stroke),Rest(RestAfterStop(Duration(Number,Number))))),
   StrokeModifier,
   EquipmentSpecification(EquipmentName),
   Pace(Number)))
@@ -370,12 +383,12 @@ SwimProgramme(SwimInstruction(
 SwimProgramme(SwimInstruction(
   Number,
   BlockInstruction(
-    SwimInstruction(SingleInstruction(Number, Stroke)),
+    SwimInstruction(SingleInstruction(Length(LengthAsDistance(Number)), Stroke)),
     SwimInstruction(
       Number,
       BlockInstruction(
-        SwimInstruction(SingleInstruction(Number, Stroke)),
-        SwimInstruction(SingleInstruction(Number, Stroke)))))))
+        SwimInstruction(SingleInstruction(Length(LengthAsDistance(Number)), Stroke)),
+        SwimInstruction(SingleInstruction(Length(LengthAsDistance(Number)), Stroke)))))))
 
 
 ## Constant definition with string
@@ -450,11 +463,11 @@ SwimProgramme(
 
 SwimProgramme(SwimInstruction(
   Number,
-  SingleInstruction(Number, Stroke),
+  SingleInstruction(Length(LengthAsDistance(Number)), Stroke),
   StrokeModifier,
   EquipmentSpecification(EquipmentName, EquipmentName),
   Pace(Number, Number),
-  Duration(Number, Number)))
+  Rest(RestSinceStart(Duration(Number, Number)))))
 
 
 ## Full Programme Structure
@@ -470,7 +483,6 @@ pace hard = 90%
 
 > Main Set
 4 x 100 Backstroke on 1:30
-0:30 rest
 
 ==>
 
@@ -481,14 +493,13 @@ SwimProgramme(
   PaceDefinition(PaceDefinitionName, Pace(Number)),
   Message,
   SwimInstruction(
-    SingleInstruction(Number, Stroke),
+    SingleInstruction(Length(LengthAsDistance(Number)), Stroke),
     Pace(PaceAlias)),
   Message,
   SwimInstruction(
     Number,
-    SingleInstruction(Number, Stroke),
-    Duration(Number, Number)),
-  RestInstruction(Duration(Number, Number)))
+    SingleInstruction(Length(LengthAsDistance(Number)), Stroke),
+    Rest(RestSinceStart(Duration(Number, Number)))))
 
 
 ## Multiple Block instructions
@@ -500,10 +511,10 @@ SwimProgramme(
 
 SwimProgramme(
   SwimInstruction(
-    BlockInstruction(SwimInstruction(SingleInstruction(Number, Stroke))),
+    BlockInstruction(SwimInstruction(SingleInstruction(Length(LengthAsDistance(Number)), Stroke))),
     Pace(Number)),
   SwimInstruction(
-    BlockInstruction(SwimInstruction(SingleInstruction(Number, Stroke))),
+    BlockInstruction(SwimInstruction(SingleInstruction(Length(LengthAsDistance(Number)), Stroke))),
     Pace(Number)))
 
 
@@ -513,7 +524,6 @@ SwimProgramme(
   > Round
   100 Freestyle @ 60%
   4 x 25 Backstroke Kick + Fins on 0:30
-  0:30 rest
 }
 
 ==>
@@ -523,12 +533,23 @@ SwimProgramme(SwimInstruction(
   BlockInstruction(
     Message,
     SwimInstruction(
-      SingleInstruction(Number, Stroke),
+      SingleInstruction(Length(LengthAsDistance(Number)), Stroke),
       Pace(Number)),
     SwimInstruction(
       Number,
-      SingleInstruction(Number, Stroke),
+      SingleInstruction(Length(LengthAsDistance(Number)), Stroke),
       StrokeModifier,
       EquipmentSpecification(EquipmentName),
-      Duration(Number, Number)),
-    RestInstruction(Duration(Number, Number)))))
+      Rest(RestSinceStart(Duration(Number, Number)))))))
+
+
+## Instruction with in-out rest
+
+100 Butterfly in-out 3
+
+==>
+
+SwimProgramme(
+    SwimInstruction(
+        SingleInstruction(Length(LengthAsDistance(Number)), Stroke),
+        Rest(RestInOut(Number))))

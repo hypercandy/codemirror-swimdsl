@@ -122,6 +122,25 @@ export function incompatibleEquipmentDiagnostic(
 }
 
 /**
+ * Provide the user with an error message when they attempt to specify multiple rest
+ * times for one swim instruction.
+ *
+ * @param from - The position of the first character to include in the error.
+ * @param to - The position of the last character to include in the error.
+ *
+ * @returns An editor diagnostic for incompatible equipment.
+ */
+export function multipleRestDiagnostic(from: number, to: number): Diagnostic {
+  return {
+    from,
+    to,
+    severity: "error",
+    message:
+      "Multiple rest times specified. Please only specify at most one rest time per instruction.",
+  };
+}
+
+/**
  * Convert a string from "PascalCase" to "sentence case".
  *
  * @param pascalCase - The string written in Pascal case.

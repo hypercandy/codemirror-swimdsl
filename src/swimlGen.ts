@@ -1,4 +1,5 @@
 import { create } from "xmlbuilder2";
+import { XMLBuilder } from "xmlbuilder2/lib/interfaces";
 import {
   AuthorDefintion,
   ConstantDefinition,
@@ -8,12 +9,11 @@ import {
   Intensity,
   Message,
   Programme,
-  RestInstruction,
   Statements,
+  StrokeModifiers,
   SwimInstruction,
   ContinueInstruction
 } from "./astTypes";
-import { XMLBuilder } from "xmlbuilder2/lib/interfaces";
 
 const XML_NAMESPACE = "https://github.com/bartneck/swiML";
 const XSI_LINK = "http://www.w3.org/2001/XMLSchema-instance";
@@ -56,9 +56,6 @@ function writeInstruction(
       writeSwimInstruction(xmlParent, instruction);
       break;
 
-    case Statements.REST_INSTRUCTION:
-      writeRestInstruction(xmlParent, instruction);
-      break;
     case Statements.MESSAGE:
       writeMessage(xmlParent, instruction);
       break;
@@ -114,11 +111,24 @@ function writeInstructionModifier(
       xmlParent.ele("breath").txt(modifier.breatheStrokes);
       break;
 
-    case InstructionModifiers.TIME:
-      xmlParent
-        .ele("rest")
-        .ele("sinceStart")
-        .txt(xmlDuration(modifier.minutes, modifier.seconds));
+    case InstructionModifiers.REST:
+      switch (modifier.type) {
+        case "SinceStart":
+          xmlParent
+            .ele("rest")
+            .ele("sinceStart")
+            .txt(xmlDuration(modifier.minutes, modifier.seconds));
+          break;
+        case "AfterStop":
+          xmlParent
+            .ele("rest")
+            .ele("afterStop")
+            .txt(xmlDuration(modifier.minutes, modifier.seconds));
+          break;
+        case "InOut":
+          xmlParent.ele("rest").ele("inOut").txt(modifier.swimmersIn);
+          break;
+      }
       break;
 
     case InstructionModifiers.EXCLUDE_ALIGN:
@@ -157,14 +167,28 @@ function writeSwimInstruction(
       writeInstruction(parent, subInstruction);
     }
   } else {
-    parent
-      .ele("length")
-      .ele("lengthAsDistance")
-      .txt(instruction.instruction.distance);
-    parent
-      .ele("stroke")
-      .ele("standardStroke")
-      .txt(instruction.instruction.stroke);
+    const len = instruction.instruction.length;
+    const length = parent.ele("length");
+    if (len.kind === "distance") {
+      length.ele("lengthAsDistance").txt(len.value);
+    } else if (len.kind == "laps") {
+      length.ele("lengthAsLaps").txt(len.value);
+    } else {
+      length.ele("lengthAsTime").txt(xmlDuration(len.minutes, len.seconds));
+    }
+
+    if (instruction.strokeModifier === StrokeModifiers.KICK) {
+      parent
+        .ele("stroke")
+        .ele("kicking")
+        .ele("standardKick")
+        .txt(instruction.instruction.stroke);
+    } else {
+      parent
+        .ele("stroke")
+        .ele("standardStroke")
+        .txt(instruction.instruction.stroke);
+    }
   }
 
   if (instruction.instructionModifiers.length > 0) {
@@ -172,24 +196,6 @@ function writeSwimInstruction(
       writeInstructionModifier(parent, modifier);
     }
   }
-}
-
-/**
- * Write an AST RestInstruction node into the XML document.
- *
- * @param xmlParent - The parent XML node to write the rest instruction inside
- *    of.
- * @param instruction - The AST rest instruction node to write as XML.
- */
-function writeRestInstruction(
-  xmlParent: XMLBuilder,
-  instruction: RestInstruction,
-): void {
-  xmlParent
-    .ele("instruction")
-    .ele("rest")
-    .ele("afterStop")
-    .txt(xmlDuration(instruction.minutes, instruction.seconds));
 }
 
 /**
@@ -315,10 +321,6 @@ export default function emitXml(programme: Programme): string {
     switch (statement.statement) {
       case Statements.SWIM_INSTRUCTION:
         writeSwimInstruction(doc, statement);
-        break;
-
-      case Statements.REST_INSTRUCTION:
-        writeRestInstruction(doc, statement);
         break;
 
       case Statements.MESSAGE:
