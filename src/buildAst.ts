@@ -1,3 +1,4 @@
+import { EditorState } from "@codemirror/state";
 import { TreeCursor } from "@lezer/common";
 import {
   AuthorDefintion,
@@ -9,6 +10,7 @@ import {
   InstructionModifier,
   InstructionModifiers,
   Intensity,
+  Length,
   Message,
   Pace,
   PaceDefinition,
@@ -17,10 +19,9 @@ import {
   SingleInstruction,
   Statement,
   Statements,
+  StrokeModifiers,
   SwimInstruction,
-  Length,
 } from "./astTypes";
-import { EditorState } from "@codemirror/state";
 
 /**
  * Create an AST node for a `Pace` CST node.
@@ -411,6 +412,19 @@ function getStroke(strokeName: string): string {
   }
 }
 
+function getStrokeModifier(strokeModifierName: string): StrokeModifiers {
+  switch (strokeModifierName) {
+    case "Kick":
+      return StrokeModifiers.KICK;
+    case "Pull":
+      return StrokeModifiers.PULL;
+    case "Drill":
+      return StrokeModifiers.DRILL;
+    default:
+      return StrokeModifiers.STANDARD;
+  }
+}
+
 /**
  * Create an AST node for a `SwimInstruction` CST node.
  *
@@ -429,7 +443,7 @@ function visitSwimInstruction(
   state: EditorState,
 ): SwimInstruction {
   let repetitions = 1;
-  let strokeModifier = "default";
+  let strokeModifier: StrokeModifiers = StrokeModifiers.STANDARD;
   let instruction: SingleInstruction | BlockInstruction;
   const instructionModifiers: InstructionModifier[] = [];
 
@@ -496,7 +510,9 @@ function visitSwimInstruction(
   if (cursor.nextSibling()) {
     let hasModifiers = true;
     if (cursor.name === "StrokeModifier") {
-      strokeModifier = state.sliceDoc(cursor.from, cursor.to);
+      strokeModifier = getStrokeModifier(
+        state.sliceDoc(cursor.from, cursor.to),
+      );
 
       // Move away from the StrokeModifier to a potential instruction modifier.
       hasModifiers = cursor.nextSibling();

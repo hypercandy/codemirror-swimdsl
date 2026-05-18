@@ -16,6 +16,13 @@ export const enum InstructionModifiers {
   INSTRUCTION_DESCRIPTION,
 }
 
+export const enum StrokeModifiers {
+  STANDARD = "standardStroke",
+  KICK = "kicking",
+  PULL = "pulling",
+  DRILL = "drill",
+}
+
 export interface ExcludeAlign {
   modifier: InstructionModifiers.EXCLUDE_ALIGN;
 }
@@ -95,7 +102,7 @@ export interface SwimInstruction {
   statement: Statements.SWIM_INSTRUCTION;
   repetitions: number;
   instruction: SingleInstruction | BlockInstruction;
-  strokeModifier: string;
+  strokeModifier?: StrokeModifiers | undefined;
   instructionModifiers: InstructionModifier[];
 }
 

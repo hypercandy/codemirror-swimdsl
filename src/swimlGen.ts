@@ -1,4 +1,5 @@
 import { create } from "xmlbuilder2";
+import { XMLBuilder } from "xmlbuilder2/lib/interfaces";
 import {
   AuthorDefintion,
   ConstantDefinition,
@@ -9,9 +10,9 @@ import {
   Message,
   Programme,
   Statements,
+  StrokeModifiers,
   SwimInstruction,
 } from "./astTypes";
-import { XMLBuilder } from "xmlbuilder2/lib/interfaces";
 
 const XML_NAMESPACE = "https://github.com/bartneck/swiML";
 const XSI_LINK = "http://www.w3.org/2001/XMLSchema-instance";
@@ -169,10 +170,19 @@ function writeSwimInstruction(
     } else {
       length.ele("lengthAsLaps").txt(len.value);
     }
-    parent
-      .ele("stroke")
-      .ele("standardStroke")
-      .txt(instruction.instruction.stroke);
+
+    if (instruction.strokeModifier === StrokeModifiers.KICK) {
+      parent
+        .ele("stroke")
+        .ele("kicking")
+        .ele("standardKick")
+        .txt(instruction.instruction.stroke);
+    } else {
+      parent
+        .ele("stroke")
+        .ele("standardStroke")
+        .txt(instruction.instruction.stroke);
+    }
   }
 
   if (instruction.instructionModifiers.length > 0) {
