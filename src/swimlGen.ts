@@ -167,8 +167,10 @@ function writeSwimInstruction(
     const length = parent.ele("length");
     if (len.kind === "distance") {
       length.ele("lengthAsDistance").txt(len.value);
-    } else {
+    } else if (len.kind == "laps") {
       length.ele("lengthAsLaps").txt(len.value);
+    } else {
+      length.ele("lengthAsTime").txt(xmlDuration(len.minutes, len.seconds));
     }
 
     if (instruction.strokeModifier === StrokeModifiers.KICK) {

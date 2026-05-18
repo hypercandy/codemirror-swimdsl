@@ -64,7 +64,7 @@ SingleInstruction {
 }
 
 Length {
-    LengthAsDistance | LengthAsLaps
+    LengthAsDistance | LengthAsLaps | LengthAsTime
 }
 
 LengthAsDistance { Number }
@@ -72,6 +72,8 @@ LengthAsDistance { Number }
 LengthAsLaps {
     Number lapsKeyword
 }
+
+LengthAsTime { Duration }
 
 Stroke { identifier }
 
@@ -170,7 +172,6 @@ messageSpecification {
     @precedence { Comment, Message }
     @precedence { lapsKeyword, identifier }
     @precedence { lapsKeyword, Message }
-    @precedence { restKeyword, identifier }
     @precedence { excludeAlignKeyword, identifier }
     @precedence { excludeAlignKeyword, Message }
     @precedence { underwaterKeyword, identifier }

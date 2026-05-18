@@ -485,17 +485,22 @@ function visitSwimInstruction(
         kind = "laps";
         break;
 
+      case "LengthAsTime":
+        kind = "time";
+        break;
+
       default:
         kind = "distance";
     }
 
     cursor.firstChild();
-
-    const length: Length = {
-      kind,
-      value: state.sliceDoc(cursor.from, cursor.to),
-    };
-    cursor.parent(); // exits LengthAsDistance or LengthAsLaps
+    let length: Length;
+    if (kind === "time") {
+      length = { kind, ...visitDuration(cursor, state) };
+    } else {
+      length = { kind, value: state.sliceDoc(cursor.from, cursor.to) };
+    }
+    cursor.parent(); // exits LengthAsDistance or LengthAsLaps or LengthAsTime
 
     cursor.parent(); // exits length
     cursor.nextSibling();

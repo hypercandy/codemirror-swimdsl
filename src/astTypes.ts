@@ -108,7 +108,8 @@ export interface SwimInstruction {
 
 export type Length =
   | { kind: "distance"; value: string }
-  | { kind: "laps"; value: string };
+  | { kind: "laps"; value: string }
+  | { kind: "time"; minutes: string; seconds: string };
 
 export interface SingleInstruction {
   isBlock: false;
